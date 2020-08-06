@@ -1,0 +1,24 @@
+---
+- name: Create pods using deployment 
+  hosts: kubernetes 
+
+  tasks:
+  - name: cleaning the workspace
+    command: rm -rf /home/ubuntu/k8s/
+    #warn: false
+    
+  - name: Copy manifest file
+    copy:
+      src: "{{ item }}"
+      dest: /home/ubuntu/k8s/
+      owner: ubuntu
+      group: ubuntu
+      mode: 0750
+    with_items:
+      - k8s-deploy.yml
+
+  - name: create a deployment
+    command: kubectl apply -f /home/ubuntu/k8s/k8s-deploy.yml
+ 
+  - name: update deployment with new pods if image updated in ecr
+    command: kubectl rollout restart deployment.v1.apps/java-deployment
